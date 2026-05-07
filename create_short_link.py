@@ -22,10 +22,6 @@ if (
 characters = string.ascii_lowercase + string.digits
 length = random.randint(1, 3)
 
-random_string = ''.join(
-    random.choices(characters, k=length)
-)
-
 con = sqlite3.connect("url.db")
 cur = con.cursor()
 
@@ -36,14 +32,21 @@ CREATE TABLE IF NOT EXISTS pair(
 )
 """)
 
-data = (url, random_string)
+while True:
+    random_string = ''.join(random.choices(characters, k=length))
 
-try:
-    cur.execute("INSERT INTO pair VALUES (?, ?)", data)
-    con.commit()
-    print("Short URL: http://localhost/" + random_string)
+    try:
+        cur.execute(
+            "INSERT INTO pair VALUES (?, ?)",
+            (url, random_string)
+        )
+        con.commit()
 
-except sqlite3.IntegrityError:
-    print("Duplicate detected")
+        print("Short URL: http://localhost/" + random_string)
+        break
+
+    except sqlite3.IntegrityError:
+        # sorted string repeats
+        continue
 
 con.close()
